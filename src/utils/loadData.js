@@ -5,3 +5,9 @@ export const loadData = async url => {
   const data = await response.json();
   return data;
 };
+
+export const updateData = async url => {
+  const response = await fetch(url, { method: 'PUT' });
+  const data = await response.json();
+  return data;
+};

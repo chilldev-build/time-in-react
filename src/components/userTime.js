@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { loadData } from "../utils/loadData";
+import { loadData, updateData } from "../utils/loadData";
 import moment from "moment";
 import Card from "react-bootstrap/Card";
 import CardGroup from "react-bootstrap/CardGroup";
@@ -16,7 +16,7 @@ const TimeParams = () => {
   const handleSubmit = async e => {
     e.preventDefault();
     console.log("time: ", time);
-    const url = "http://localhost:3001/1";
+    const url = "http://localhost:3001/time/1";
     timeData = await loadData(url);
 
     // console.log("this is the punchIn:", punchIn);
@@ -24,6 +24,15 @@ const TimeParams = () => {
     // console.log("this is the answer:", calcHours);
     setTime(timeData);
   };
+
+  const clockOut = async e => {
+    e.preventDefault();
+    console.log("time: ", time);
+    const url = "http://localhost:3001/time/clockout/1";
+    timeData = await updateData(url);
+    handleSubmit();
+  };
+
 
   return (
     <>
@@ -37,7 +46,7 @@ const TimeParams = () => {
           var punchIn = moment(timeData[timeData.length - 1].starttime);
           var calcMins = currentTime.diff(punchIn, "minutes");
           var calcHours = (calcMins / 60).toFixed(2);
-          //const style = { InputStyle: { width: "10px" } };
+
           return (
             <>
               <Card
@@ -77,11 +86,11 @@ const TimeParams = () => {
                 </Card.Footer>
                 {punch.endtime == null ? (
                   <Card.Footer key={punch.id}>
-                    <Button variant="primary">Clock-Out</Button>
+                    <Button variant="primary" onClick={clockOut}>Clock-Out</Button>
                   </Card.Footer>
                 ) : (
-                  ""
-                )}
+                    ""
+                  )}
               </Card>
             </>
           );
