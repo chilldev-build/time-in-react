@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { loadData, updateData, newData } from "../utils/loadData";
+import useDropdown from "./useDropdown";
 import moment from "moment";
 import Card from "react-bootstrap/Card";
 import CardGroup from "react-bootstrap/CardGroup";
 import CardDeck from "react-bootstrap/CardDeck";
 import Button from "react-bootstrap/Button";
-
-
 
 const TimeParams = () => {
   const [time, setTime] = useState([]);
@@ -15,10 +14,13 @@ const TimeParams = () => {
   const [worked, setWorked] = useState('');
   const [totalWorked, setTotalWorked] = useState('');
   const [dayHoursArray, setDayHoursArray] = useState('');
+  const [calYears, setCalYears] = useState([]);
+  const [year, YearDropdown] = useDropdown("Year ", "2019", calYears);
 
 
   useEffect(() => {
     refreshData();
+    getYears();
   }, [])
 
 
@@ -30,9 +32,23 @@ const TimeParams = () => {
   //   //setWorked(moment())
   // }, 1000);
 
+  const getYears = async () => {
+    const url = "http://localhost:3001/time/years/1";
+    const yearsData = await loadData(url);
+    console.log('YEARS ARE:', yearsData);
+    let yearsArray = [];
+    yearsData.map(year => {
+      yearsArray.push(year.year)
+    })
+
+
+    setCalYears(yearsArray);
+  }
+
   const refreshData = async () => {
     const url = "http://localhost:3001/time/1";
     const timeData = await loadData(url);
+    console.log('time query is:', timeData)
     let punchIn = (timeData[timeData.length - 1].endtime == null) ? moment(timeData[timeData.length - 1].starttime) : moment();
     let calcMins = moment().diff(punchIn, "seconds");
     let calcHours = (calcMins / 3600).toFixed(2);
@@ -95,6 +111,7 @@ const TimeParams = () => {
   return (
     <>
       {isClockedIn === true ? <Button variant="primary" onClick={clockOut}>Clock-Out</Button> : <Button variant="primary" onClick={clockIn}>Clock-In</Button>}
+      <YearDropdown />
 
       <CardDeck>
         {time.map(punch => {
