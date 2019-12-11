@@ -7,6 +7,9 @@ import CardGroup from "react-bootstrap/CardGroup";
 import CardDeck from "react-bootstrap/CardDeck";
 import Button from "react-bootstrap/Button";
 
+//const calPeriods = [1, 2, 3, 4, 5, 6, 7, 8];
+
+
 const TimeParams = () => {
   const [time, setTime] = useState([]);
   const [lastPunch, setLastPunch] = useState('');
@@ -15,13 +18,47 @@ const TimeParams = () => {
   const [totalWorked, setTotalWorked] = useState('');
   const [dayHoursArray, setDayHoursArray] = useState('');
   const [calYears, setCalYears] = useState([]);
-  const [year, YearDropdown] = useDropdown("Year ", "2019", calYears);
+  const [calPeriods, setCalPeriods] = useState([]);
+  const [periodFilter, setPeriodFilter] = useState([2019]);
+  const [year, YearDropdown] = useDropdown("Year ", moment().format('YYYY'), calYears);
+  const [periods, PeriodDropdown, updatePeriods] = useDropdown("Work Period ", moment().format('YYYY'), periodFilter);
 
-
+  //Component did mount
   useEffect(() => {
     refreshData();
     getYears();
+    getPeriods();
   }, [])
+
+  //Component did update
+  useEffect(() => {
+    let periodFilter = calPeriods;
+    let filterPeriodArray = [];
+    let periodArray = [];
+    setPeriodFilter([])
+    updatePeriods("");
+    console.log('periodFilter is:', periodFilter)
+
+    periodFilter.map(period => {
+      periodArray.push({ year: moment(period.period_end).format('YYYY'), period: moment(period.period_begin).format('MM/DD/YYYY') + ' - ' + moment(period.period_end).format('MM/DD/YYYY') })
+    })
+    console.log('periodArray is:', periodArray)
+
+    function checkYear(item) {
+      return item.year == year;
+    }
+
+    periodArray = periodArray.filter(checkYear);
+    console.log('periodArray after filter: ', periodArray)
+
+    periodArray.map(period => {
+      filterPeriodArray.push(period.period)
+    })
+
+    console.log('filterPeriodArray is after select:', filterPeriodArray)
+    setPeriodFilter(filterPeriodArray);
+
+  }, [year]);
 
 
   // setTimeout(() => {
@@ -35,7 +72,6 @@ const TimeParams = () => {
   const getYears = async () => {
     const url = "http://localhost:3001/time/years/1";
     const yearsData = await loadData(url);
-    console.log('YEARS ARE:', yearsData);
     let yearsArray = [];
     yearsData.map(year => {
       yearsArray.push(year.year)
@@ -43,6 +79,36 @@ const TimeParams = () => {
 
 
     setCalYears(yearsArray);
+  }
+
+  const getPeriods = async () => {
+    const url = "http://localhost:3001/time/periods/1";
+    const periodData = await loadData(url);
+    let periodArray = [];
+    let filterPeriodArray = [];
+    // periodData.map(period => {
+    //   (moment(period.period_end).format('YYYY') == moment().format('YYYY')) ?
+    //     periodArray.push(moment(period.period_begin).format('MM/DD/YYYY') + ' - ' + moment(period.period_end).format('MM/DD/YYYY')) : ''
+    // })
+    periodData.map(period => {
+      periodArray.push({ year: moment(period.period_end).format('YYYY'), period: moment(period.period_begin).format('MM/DD/YYYY') + ' - ' + moment(period.period_end).format('MM/DD/YYYY') })
+    })
+    console.log('Periods ARE:', periodArray);
+
+    function checkYear(year) {
+      return year.year == '2019';
+    }
+
+    periodArray = periodArray.filter(checkYear);
+    console.log('periodArray after filter: ', periodArray)
+
+    periodArray.map(period => {
+      filterPeriodArray.push(period.period)
+    })
+
+    setCalPeriods(periodData);
+    setPeriodFilter(filterPeriodArray);
+    console.log(calPeriods);
   }
 
   const refreshData = async () => {
@@ -112,6 +178,7 @@ const TimeParams = () => {
     <>
       {isClockedIn === true ? <Button variant="primary" onClick={clockOut}>Clock-Out</Button> : <Button variant="primary" onClick={clockIn}>Clock-In</Button>}
       <YearDropdown />
+      <PeriodDropdown />
 
       <CardDeck>
         {time.map(punch => {
