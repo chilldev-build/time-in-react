@@ -7,11 +7,9 @@ import CardGroup from "react-bootstrap/CardGroup";
 import CardDeck from "react-bootstrap/CardDeck";
 import Button from "react-bootstrap/Button";
 
-//const calPeriods = [1, 2, 3, 4, 5, 6, 7, 8];
-
-
 const TimeParams = () => {
-  const [time, setTime] = useState([]);
+  const [time, setTime] = useState([{ id: 1, starttime: moment().format(), endtime: moment().format() }]);
+  const [timeStore, setTimeStore] = useState([{ id: 1, starttime: moment().format(), endtime: moment().format() }]);
   const [lastPunch, setLastPunch] = useState('');
   const [isClockedIn, setIsClockedIn] = useState('');
   const [worked, setWorked] = useState('');
@@ -21,7 +19,7 @@ const TimeParams = () => {
   const [calPeriods, setCalPeriods] = useState([]);
   const [periodFilter, setPeriodFilter] = useState([2019]);
   const [year, YearDropdown] = useDropdown("Year ", moment().format('YYYY'), calYears);
-  const [periods, PeriodDropdown, updatePeriods] = useDropdown("Work Period ", moment().format('YYYY'), periodFilter);
+  const [period, PeriodDropdown, updatePeriods] = useDropdown("Work Period ", moment().format('YYYY'), periodFilter);
 
   //Component did mount
   useEffect(() => {
@@ -30,7 +28,7 @@ const TimeParams = () => {
     getPeriods();
   }, [])
 
-  //Component did update
+  //Year component did update
   useEffect(() => {
     let periodFilter = calPeriods;
     let filterPeriodArray = [];
@@ -58,16 +56,30 @@ const TimeParams = () => {
     console.log('filterPeriodArray is after select:', filterPeriodArray)
     setPeriodFilter(filterPeriodArray);
 
+    console.log('year selected is:', year)
+
   }, [year]);
 
+  //Period component did update
+  useEffect(() => {
+    let punchFilter = timeStore;
+    let filterPunchArray = [];
+    let punchArray = [];
 
-  // setTimeout(() => {
-  //   setCurrentTime(moment());
-  //   let hours = currentTime.diff(lastPunch, 'minutes')
-  //   setWorked((hours / 60).toFixed(2));
-  //   //console.log('worked is:', worked);
-  //   //setWorked(moment())
-  // }, 1000);
+    console.log('punch filter is:', punchFilter)
+
+    function checkPeriod(item) {
+      return moment(item.starttime).format('MM/DD/YYYY') >= period.substring(0, 10) && moment(item.starttime).format('MM/DD/YYYY') <= period.substring(13, 23);
+    }
+
+    filterPunchArray = punchFilter.filter(checkPeriod);
+    console.log('filterPunchArray after filter: ', filterPunchArray)
+
+    setTime(filterPunchArray);
+
+    console.log('period selected is:', period)
+
+  }, [period]);
 
   const getYears = async () => {
     const url = "http://localhost:3001/time/years/1";
@@ -77,7 +89,6 @@ const TimeParams = () => {
       yearsArray.push(year.year)
     })
 
-
     setCalYears(yearsArray);
   }
 
@@ -86,10 +97,7 @@ const TimeParams = () => {
     const periodData = await loadData(url);
     let periodArray = [];
     let filterPeriodArray = [];
-    // periodData.map(period => {
-    //   (moment(period.period_end).format('YYYY') == moment().format('YYYY')) ?
-    //     periodArray.push(moment(period.period_begin).format('MM/DD/YYYY') + ' - ' + moment(period.period_end).format('MM/DD/YYYY')) : ''
-    // })
+
     periodData.map(period => {
       periodArray.push({ year: moment(period.period_end).format('YYYY'), period: moment(period.period_begin).format('MM/DD/YYYY') + ' - ' + moment(period.period_end).format('MM/DD/YYYY') })
     })
@@ -136,6 +144,7 @@ const TimeParams = () => {
     setIsClockedIn((timeData[timeData.length - 1].endtime == null) ? true : false);
     setWorked(calcHours);
     setTime(timeData);
+    setTimeStore(timeData);
     setTotalWorked(sum.toFixed(2));
   }
 
