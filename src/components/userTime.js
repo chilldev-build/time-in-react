@@ -18,45 +18,46 @@ const TimeParams = () => {
   const [calYears, setCalYears] = useState([]);
   const [calPeriods, setCalPeriods] = useState([]);
   const [periodFilter, setPeriodFilter] = useState([2019]);
+  const [landingDate, setLandingDate] = useState('12/06/2019 - 12/19/2019');
   const [year, YearDropdown] = useDropdown("Year ", moment().format('YYYY'), calYears);
   const [period, PeriodDropdown, updatePeriods] = useDropdown("Work Period ", moment().format('YYYY'), periodFilter);
 
   //Component did mount
   useEffect(() => {
+    getPeriods();
     refreshData();
     getYears();
-    getPeriods();
   }, [])
 
-  //Year component did update
+  //Year component did update changes list in period selection
   useEffect(() => {
     let periodFilter = calPeriods;
     let filterPeriodArray = [];
     let periodArray = [];
     setPeriodFilter([])
     updatePeriods("");
-    console.log('periodFilter is:', periodFilter)
+    //console.log('periodFilter is:', periodFilter)
 
     periodFilter.map(period => {
       periodArray.push({ year: moment(period.period_end).format('YYYY'), period: moment(period.period_begin).format('MM/DD/YYYY') + ' - ' + moment(period.period_end).format('MM/DD/YYYY') })
     })
-    console.log('periodArray is:', periodArray)
+    //console.log('periodArray is:', periodArray)
 
     function checkYear(item) {
       return item.year == year;
     }
 
     periodArray = periodArray.filter(checkYear);
-    console.log('periodArray after filter: ', periodArray)
+    //console.log('periodArray after filter: ', periodArray)
 
     periodArray.map(period => {
       filterPeriodArray.push(period.period)
     })
 
-    console.log('filterPeriodArray is after select:', filterPeriodArray)
+    //console.log('filterPeriodArray is after select:', filterPeriodArray)
     setPeriodFilter(filterPeriodArray);
 
-    console.log('year selected is:', year)
+    //console.log('year selected is:', year)
 
   }, [year]);
 
@@ -66,18 +67,18 @@ const TimeParams = () => {
     let filterPunchArray = [];
     let punchArray = [];
 
-    console.log('punch filter is:', punchFilter)
+    //console.log('punch filter is:', punchFilter)
 
     function checkPeriod(item) {
       return moment(item.starttime).format('MM/DD/YYYY') >= period.substring(0, 10) && moment(item.starttime).format('MM/DD/YYYY') <= period.substring(13, 23);
     }
 
     filterPunchArray = punchFilter.filter(checkPeriod);
-    console.log('filterPunchArray after filter: ', filterPunchArray)
+    //console.log('filterPunchArray after filter: ', filterPunchArray)
 
     setTime(filterPunchArray);
 
-    console.log('period selected is:', period)
+    //console.log('period selected is:', period)
 
   }, [period]);
 
@@ -95,28 +96,30 @@ const TimeParams = () => {
   const getPeriods = async () => {
     const url = "http://localhost:3001/time/periods/1";
     const periodData = await loadData(url);
+    //console.log('periodData is: ', periodData)
+    setCalPeriods(periodData);
     let periodArray = [];
     let filterPeriodArray = [];
 
     periodData.map(period => {
       periodArray.push({ year: moment(period.period_end).format('YYYY'), period: moment(period.period_begin).format('MM/DD/YYYY') + ' - ' + moment(period.period_end).format('MM/DD/YYYY') })
     })
-    console.log('Periods ARE:', periodArray);
+    //console.log('Periods ARE:', periodArray);
 
     function checkYear(year) {
-      return year.year == '2019';
+      return year.year == moment().format('YYYY');
     }
 
     periodArray = periodArray.filter(checkYear);
-    console.log('periodArray after filter: ', periodArray)
+    //console.log('periodArray after filter: ', periodArray)
 
     periodArray.map(period => {
       filterPeriodArray.push(period.period)
     })
 
-    setCalPeriods(periodData);
     setPeriodFilter(filterPeriodArray);
-    console.log(calPeriods);
+    //console.log('calPeriods is: ', calPeriods);
+    return periodData;
   }
 
   const refreshData = async () => {
@@ -127,7 +130,41 @@ const TimeParams = () => {
     let calcMins = moment().diff(punchIn, "seconds");
     let calcHours = (calcMins / 3600).toFixed(2);
     setLastPunch(punchIn);
-    let hoursArray = []
+    let hoursArray = [];
+    let punchFilter = timeData;
+
+    let periodData = await getPeriods();
+    console.log('periodData from getPeriod is: ', periodData);
+
+    let periodArray = [];
+    let filterPeriodArray = [];
+
+    periodData.map(period => {
+      periodArray.push({ year: moment(period.period_end).format('YYYY'), period: moment(period.period_begin).format('MM/DD/YYYY') + ' - ' + moment(period.period_end).format('MM/DD/YYYY') })
+    })
+    console.log('Periods ARE:', periodArray);
+
+    function checkDate(item) {
+      return (item.period.substring(0, 10) <= moment().format('MM/DD/YYYY') && item.period.substring(13, 23) >= moment().format('MM/DD/YYYY'));
+    }
+
+    periodArray = periodArray.filter(checkDate);
+    console.log('periodArray after filter: ', periodArray)
+
+    function checkPeriod(item) {
+      return moment(item.starttime).format('MM/DD/YYYY') >= '12/06/2019' && moment(item.starttime).format('MM/DD/YYYY') <= '12/19/2019';
+    }
+
+    let filterPunchArray = punchFilter.filter(checkPeriod);
+    //console.log('filterPunchArray after filter: ', filterPunchArray)
+
+    setTime(filterPunchArray);
+
+    periodArray.map(period => {
+      filterPeriodArray.push(period.period)
+    })
+    console.log('filterPeriodArray after filter in REFRESH is: ', filterPeriodArray)
+
     timeData.map(punch => {
       hoursArray.push(parseFloat(punch.hours == null ? 0.00 : punch.hours));
       return;
@@ -143,7 +180,7 @@ const TimeParams = () => {
 
     setIsClockedIn((timeData[timeData.length - 1].endtime == null) ? true : false);
     setWorked(calcHours);
-    setTime(timeData);
+    //setTime(timeData);
     setTimeStore(timeData);
     setTotalWorked(sum.toFixed(2));
   }
