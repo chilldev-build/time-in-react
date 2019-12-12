@@ -16,48 +16,45 @@ const TimeParams = () => {
   const [totalWorked, setTotalWorked] = useState('');
   const [dayHoursArray, setDayHoursArray] = useState('');
   const [calYears, setCalYears] = useState([]);
-  const [calPeriods, setCalPeriods] = useState([]);
+  const [calendarPeriods, setCalendarPeriods] = useState([]);
   const [periodFilter, setPeriodFilter] = useState([2019]);
+  const [currentPeriod, setCurrentPeriod] = useState('')
   const [landingDate, setLandingDate] = useState('12/06/2019 - 12/19/2019');
-  const [year, YearDropdown] = useDropdown("Year ", moment().format('YYYY'), calYears);
-  const [period, PeriodDropdown, updatePeriods] = useDropdown("Work Period ", moment().format('YYYY'), periodFilter);
+  const [year, YearDropdown, updateYear] = useDropdown("Year ", moment().format('YYYY'), calYears);
+  const [period, PeriodDropdown, updatePeriods] = useDropdown("Work Period ", currentPeriod, periodFilter);
+
+
+  console.log('currentPeriod is: ', currentPeriod);
 
   //Component did mount
   useEffect(() => {
-    getPeriods();
     refreshData();
     getYears();
   }, [])
 
   //Year component did update changes list in period selection
   useEffect(() => {
-    let periodFilter = calPeriods;
+    let periodFilter = calendarPeriods;
     let filterPeriodArray = [];
     let periodArray = [];
     setPeriodFilter([])
     updatePeriods("");
-    //console.log('periodFilter is:', periodFilter)
 
     periodFilter.map(period => {
       periodArray.push({ year: moment(period.period_end).format('YYYY'), period: moment(period.period_begin).format('MM/DD/YYYY') + ' - ' + moment(period.period_end).format('MM/DD/YYYY') })
-    })
-    //console.log('periodArray is:', periodArray)
+    });
 
     function checkYear(item) {
       return item.year == year;
-    }
+    };
 
     periodArray = periodArray.filter(checkYear);
-    //console.log('periodArray after filter: ', periodArray)
 
     periodArray.map(period => {
       filterPeriodArray.push(period.period)
-    })
+    });
 
-    //console.log('filterPeriodArray is after select:', filterPeriodArray)
     setPeriodFilter(filterPeriodArray);
-
-    //console.log('year selected is:', year)
 
   }, [year]);
 
@@ -66,19 +63,26 @@ const TimeParams = () => {
     let punchFilter = timeStore;
     let filterPunchArray = [];
     let punchArray = [];
-
-    //console.log('punch filter is:', punchFilter)
+    let hoursArray = [0];
 
     function checkPeriod(item) {
       return moment(item.starttime).format('MM/DD/YYYY') >= period.substring(0, 10) && moment(item.starttime).format('MM/DD/YYYY') <= period.substring(13, 23);
     }
 
     filterPunchArray = punchFilter.filter(checkPeriod);
-    //console.log('filterPunchArray after filter: ', filterPunchArray)
+
+    filterPunchArray.map(punch => {
+      hoursArray.push(parseFloat(punch.hours == null ? 0.00 : punch.hours));
+      return;
+    });
+
+    const add = (a, b) =>
+      a + b
+    // use reduce to sum our array
+    const sum = hoursArray.reduce(add);
 
     setTime(filterPunchArray);
-
-    //console.log('period selected is:', period)
+    setTotalWorked(sum.toFixed(2));
 
   }, [period]);
 
@@ -96,29 +100,26 @@ const TimeParams = () => {
   const getPeriods = async () => {
     const url = "http://localhost:3001/time/periods/1";
     const periodData = await loadData(url);
-    //console.log('periodData is: ', periodData)
-    setCalPeriods(periodData);
+    setCalendarPeriods(periodData);
     let periodArray = [];
     let filterPeriodArray = [];
 
     periodData.map(period => {
       periodArray.push({ year: moment(period.period_end).format('YYYY'), period: moment(period.period_begin).format('MM/DD/YYYY') + ' - ' + moment(period.period_end).format('MM/DD/YYYY') })
     })
-    //console.log('Periods ARE:', periodArray);
 
     function checkYear(year) {
       return year.year == moment().format('YYYY');
     }
 
     periodArray = periodArray.filter(checkYear);
-    //console.log('periodArray after filter: ', periodArray)
 
     periodArray.map(period => {
       filterPeriodArray.push(period.period)
     })
 
     setPeriodFilter(filterPeriodArray);
-    //console.log('calPeriods is: ', calPeriods);
+
     return periodData;
   }
 
@@ -132,6 +133,7 @@ const TimeParams = () => {
     setLastPunch(punchIn);
     let hoursArray = [];
     let punchFilter = timeData;
+    updatePeriods('');
 
     let periodData = await getPeriods();
     console.log('periodData from getPeriod is: ', periodData);
@@ -149,23 +151,20 @@ const TimeParams = () => {
     }
 
     periodArray = periodArray.filter(checkDate);
-    console.log('periodArray after filter: ', periodArray)
 
     function checkPeriod(item) {
       return moment(item.starttime).format('MM/DD/YYYY') >= '12/06/2019' && moment(item.starttime).format('MM/DD/YYYY') <= '12/19/2019';
     }
 
     let filterPunchArray = punchFilter.filter(checkPeriod);
-    //console.log('filterPunchArray after filter: ', filterPunchArray)
 
     setTime(filterPunchArray);
 
     periodArray.map(period => {
       filterPeriodArray.push(period.period)
     })
-    console.log('filterPeriodArray after filter in REFRESH is: ', filterPeriodArray)
 
-    timeData.map(punch => {
+    filterPunchArray.map(punch => {
       hoursArray.push(parseFloat(punch.hours == null ? 0.00 : punch.hours));
       return;
     }
@@ -180,9 +179,11 @@ const TimeParams = () => {
 
     setIsClockedIn((timeData[timeData.length - 1].endtime == null) ? true : false);
     setWorked(calcHours);
-    //setTime(timeData);
     setTimeStore(timeData);
     setTotalWorked(sum.toFixed(2));
+    setCurrentPeriod(periodArray[0].period);
+    updatePeriods(periodArray[0].period);
+    console.log('currentPeriodSet is: ', periodArray[0].period);
   }
 
   const updateHours = () => {
@@ -220,11 +221,20 @@ const TimeParams = () => {
     refreshData();
   }
 
+  const moveToCurrent = () => {
+    updateYear(moment().format('YYYY'));
+    setTimeout(() => {
+      updatePeriods(currentPeriod)
+    }, 100);
+
+  }
+  console.log('currentPeriod is: ', currentPeriod);
   return (
     <>
       {isClockedIn === true ? <Button variant="primary" onClick={clockOut}>Clock-Out</Button> : <Button variant="primary" onClick={clockIn}>Clock-In</Button>}
       <YearDropdown />
       <PeriodDropdown />
+      {period !== currentPeriod ? <Button variant="primary" onClick={moveToCurrent}>Show Current Period</Button> : ''}
 
       <CardDeck>
         {time.map(punch => {
