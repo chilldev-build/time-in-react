@@ -29,7 +29,7 @@ const TimeParams = () => {
     moment().format("YYYY"),
     calYears
   );
-  const [period, PeriodDropdown, updatePeriods] = useDropdown(
+  const [period, PeriodDropdown, updatePeriod] = useDropdown(
     "Work Period ",
     currentPeriod,
     periodFilter
@@ -49,7 +49,7 @@ const TimeParams = () => {
     let filterPeriodArray = [];
     let periodArray = [];
     setPeriodFilter([]);
-    updatePeriods("");
+    updatePeriod("");
 
     periodFilter.map(period => {
       periodArray.push({
@@ -83,7 +83,7 @@ const TimeParams = () => {
     let notCurrentYearFunction =
       moment().format("YYYY") === filterPeriodArray[0].substring(19, 24)
         ? ""
-        : updatePeriods(filterPeriodArray[0]);
+        : updatePeriod(filterPeriodArray[0]);
   }, [year]);
 
   //Period component did update
@@ -242,7 +242,7 @@ const TimeParams = () => {
     );
     setWorked(calcHours);
     setTimeStore(timeData);
-    updatePeriods(periodArray[0].period);
+    updatePeriod(periodArray[0].period);
   };
 
   const updateHours = () => {
@@ -284,21 +284,23 @@ const TimeParams = () => {
   const moveToCurrent = () => {
     updateYear(moment().format("YYYY"));
     setTimeout(() => {
-      updatePeriods(currentPeriod);
+      updatePeriod(currentPeriod);
     }, 100);
   };
 
+  function findCurrentIndex(periodIndex) {
+    return periodIndex === period;
+  }
+
   const moveToPrevious = () => {
-    updateYear(moment().format("YYYY"));
     setTimeout(() => {
-      updatePeriods(currentPeriod);
+      updatePeriod(periodFilter[periodFilter.findIndex(findCurrentIndex) - 1]);
     }, 100);
   };
 
   const moveToNext = () => {
-    updateYear(moment().format("YYYY"));
     setTimeout(() => {
-      updatePeriods(currentPeriod);
+      updatePeriod(periodFilter[periodFilter.findIndex(findCurrentIndex) + 1]);
     }, 100);
   };
 
