@@ -5,6 +5,9 @@ import moment from "moment";
 import Card from "react-bootstrap/Card";
 import CardDeck from "react-bootstrap/CardDeck";
 import Button from "react-bootstrap/Button";
+import ButtonToolbar from "react-bootstrap/ButtonToolbar";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
+import Jumbotron from "react-bootstrap/Jumbotron";
 
 const TimeParams = () => {
   const [time, setTime] = useState([
@@ -20,9 +23,9 @@ const TimeParams = () => {
   const [dayHoursArray, setDayHoursArray] = useState([]);
   const [calYears, setCalYears] = useState([]);
   const [calendarPeriods, setCalendarPeriods] = useState([
-    "01/01/1999 - 01/01/1999"
+    "00/00/0000 - 00/00/0000"
   ]);
-  const [periodFilter, setPeriodFilter] = useState(["01/01/1999 - 01/01/1999"]);
+  const [periodFilter, setPeriodFilter] = useState(["00/00/0000 - 00/00/0000"]);
   const [currentPeriod, setCurrentPeriod] = useState("");
   const [year, YearDropdown, updateYear] = useDropdown(
     "Year ",
@@ -34,8 +37,6 @@ const TimeParams = () => {
     currentPeriod,
     periodFilter
   );
-
-  console.log("periodFilter is: ", periodFilter);
 
   //Component did mount
   useEffect(() => {
@@ -70,15 +71,7 @@ const TimeParams = () => {
     periodArray.map(period => {
       filterPeriodArray.push(period.period);
     });
-    console.log("year useEffect is:", filterPeriodArray);
     setPeriodFilter(filterPeriodArray);
-    let isCurrentYearTrue =
-      moment().format("YYYY") === filterPeriodArray[0].substring(19, 24)
-        ? "true"
-        : "false";
-    console.log(isCurrentYearTrue);
-    console.log(filterPeriodArray[0].substring(19, 24));
-    console.log(moment().format("YYYY"));
 
     let notCurrentYearFunction =
       moment().format("YYYY") === filterPeriodArray[0].substring(19, 24)
@@ -93,7 +86,6 @@ const TimeParams = () => {
     let punchArray = [];
     let hoursArray = [0];
 
-    console.log("period before filter is:", period);
     function checkPeriod(item) {
       return (
         moment(item.starttime).format("YYYY") === period.substring(19, 24) &&
@@ -113,14 +105,8 @@ const TimeParams = () => {
     const add = (a, b) => a + b;
     // use reduce to sum our array
     const sum = hoursArray.reduce(add);
-    console.log(sum);
     setTime(filterPunchArray);
     setTotalWorked(sum.toFixed(2));
-    console.log(
-      currentPeriod === period
-        ? "currentperiod is period"
-        : "currentPeriod is not period"
-    );
     let hoursUpdateFunction = currentPeriod === period ? updateHours() : "";
   }, [period]);
 
@@ -202,12 +188,7 @@ const TimeParams = () => {
     periodArray = periodArray.filter(checkDate);
     setCurrentPeriod(periodArray[0].period);
 
-    let test = "12/10/2018" >= "12/06/2019" ? "True" : "False";
-    console.log(test);
-    console.log(periodArray[0].period.substring(0, 10));
-
     function checkPeriod(item) {
-      console.log(moment(item.starttime).format("MM/DD/YYYY"));
       return (
         moment(item.starttime).format("MM/DD/YYYY") >=
           moment(periodArray[0].period.substring(0, 10)).format("MM/DD/YYYY") &&
@@ -215,14 +196,12 @@ const TimeParams = () => {
           periodArray[0].period.substring(13, 23)
       );
     }
-    console.log(punchFilter);
     let filterPunchArray = punchFilter.filter(checkPeriod);
     setTime(filterPunchArray);
 
     periodArray.map(period => {
       filterPeriodArray.push(period.period);
     });
-    console.log(filterPunchArray);
     filterPunchArray.map(punch => {
       hoursArray.push(parseFloat(punch.hours == null ? 0.0 : punch.hours));
       return;
@@ -234,7 +213,6 @@ const TimeParams = () => {
     const add = (a, b) => a + b;
     // use reduce to sum our array
     const sum = hoursArray.reduce(add);
-    console.log("sum is:", sum);
     setTotalWorked(sum.toFixed(2));
 
     setIsClockedIn(
@@ -304,44 +282,43 @@ const TimeParams = () => {
     }, 100);
   };
 
-  console.log("period is:", period);
-  console.log(
-    "periodFilter length -1 is:",
-    periodFilter[periodFilter.length - 1]
-  );
-  console.log("time at render is: ", time);
   return (
     <>
-      {isClockedIn === true ? (
-        <Button variant="primary" onClick={clockOut}>
-          Clock-Out
-        </Button>
-      ) : (
-        <Button variant="primary" onClick={clockIn}>
-          Clock-In
-        </Button>
-      )}
+      <Jumbotron>
+        <h1>Ferris Bueller</h1>
+        <p>Today is {moment().format("dddd MMM Do YYYY")}</p>
+        <p>
+          {isClockedIn === true ? (
+            <Button variant="primary" size="lg" onClick={clockOut}>
+              Clock-Out
+            </Button>
+          ) : (
+            <Button variant="primary" size="lg" onClick={clockIn}>
+              Clock-In
+            </Button>
+          )}
+        </p>
+      </Jumbotron>
       <YearDropdown />
       <PeriodDropdown />
-      {period !== currentPeriod ? (
-        <Button variant="primary" onClick={moveToCurrent}>
-          Show Current Period
-        </Button>
-      ) : (
-        ""
-      )}
+      <ButtonToolbar>
+        {period !== currentPeriod ? (
+          <Button variant="outline-dark" block onClick={moveToCurrent}>
+            Show Current Period
+          </Button>
+        ) : (
+          <Button variant="outline-dark" block onClick={moveToCurrent} disabled>
+            Show Current Period
+          </Button>
+        )}
+      </ButtonToolbar>
       {period === periodFilter[0] ? (
-        ""
-      ) : (
-        <Button variant="primary" onClick={moveToPrevious}>
+        <Button variant="primary" block onClick={moveToPrevious} disabled>
           Show Previous Period
         </Button>
-      )}
-      {period === periodFilter[periodFilter.length - 1] ? (
-        ""
       ) : (
-        <Button variant="primary" onClick={moveToNext}>
-          Show Next Period
+        <Button variant="primary" block onClick={moveToPrevious}>
+          Show Previous Period
         </Button>
       )}
       <CardDeck>
@@ -397,6 +374,15 @@ const TimeParams = () => {
           );
         })}
       </CardDeck>
+      {period === periodFilter[periodFilter.length - 1] ? (
+        <Button variant="primary" block onClick={moveToNext} disabled>
+          Show Next Period
+        </Button>
+      ) : (
+        <Button variant="primary" block onClick={moveToNext}>
+          Show Next Period
+        </Button>
+      )}
       <Card key="totalhours">
         <Card.Header as="h5">Total Hours for Period</Card.Header>
         <Card.Body>
