@@ -289,7 +289,7 @@ const TimeParams = () => {
   return (
     <div className="grid-container">
       <Jumbotron className="item1">
-        <h1>Christopher Longname Hill</h1>
+        <h1>Ferris Bueller</h1>
         <p>Today is {moment().format("dddd MMMM Do, YYYY")}</p>
         <p>
           {isClockedIn === true ? (
