@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { loadData, updateData, newData } from "../utils/loadData";
 import useDropdown from "./useDropdown";
+import LeftNav from "./nav";
 import moment from "moment";
 import Card from "react-bootstrap/Card";
 import CardDeck from "react-bootstrap/CardDeck";
@@ -8,6 +9,8 @@ import Button from "react-bootstrap/Button";
 import ButtonToolbar from "react-bootstrap/ButtonToolbar";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Jumbotron from "react-bootstrap/Jumbotron";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "../../src/userTime.css";
 
 const TimeParams = () => {
   const [time, setTime] = useState([
@@ -274,6 +277,7 @@ const TimeParams = () => {
     setTimeout(() => {
       updatePeriod(periodFilter[periodFilter.findIndex(findCurrentIndex) - 1]);
     }, 100);
+    console.log(moment().format());
   };
 
   const moveToNext = () => {
@@ -283,122 +287,150 @@ const TimeParams = () => {
   };
 
   return (
-    <>
-      <Jumbotron>
-        <h1>Ferris Bueller</h1>
-        <p>Today is {moment().format("dddd MMM Do YYYY")}</p>
+    <div className="grid-container">
+      <Jumbotron className="item1">
+        <h1>Christopher Longname Hill</h1>
+        <p>Today is {moment().format("dddd MMMM Do, YYYY")}</p>
         <p>
           {isClockedIn === true ? (
-            <Button variant="primary" size="lg" onClick={clockOut}>
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={clockOut}
+              aria-label="Use this button to Clock out"
+            >
               Clock-Out
             </Button>
           ) : (
-            <Button variant="primary" size="lg" onClick={clockIn}>
+            ""
+          )}
+          {isClockedIn === false ? (
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={clockIn}
+              aria-label="Use this button to Clock In"
+            >
               Clock-In
             </Button>
+          ) : (
+            ""
           )}
         </p>
       </Jumbotron>
-      <YearDropdown />
-      <PeriodDropdown />
-      <ButtonToolbar>
-        {period !== currentPeriod ? (
-          <Button variant="outline-dark" block onClick={moveToCurrent}>
-            Show Current Period
-          </Button>
-        ) : (
-          <Button variant="outline-dark" block onClick={moveToCurrent} disabled>
-            Show Current Period
-          </Button>
-        )}
-      </ButtonToolbar>
-      {period === periodFilter[0] ? (
-        <Button variant="primary" block onClick={moveToPrevious} disabled>
-          Show Previous Period
-        </Button>
-      ) : (
-        <Button variant="primary" block onClick={moveToPrevious}>
-          Show Previous Period
-        </Button>
-      )}
-      <CardDeck>
-        {time.map(punch => {
-          return (
-            <>
-              <Card
-                key={`card-${punch.id}`}
-                bg="light"
-                className="text-center"
-                border="dark"
-                style={{ width: "10rem" }}
-              >
-                <Card.Header key={`date-${punch.id}`} as="h5">
-                  {moment(punch.starttime).format("MM/DD/YYYY")}
-                </Card.Header>
-                <Card.Body key={`clockin-${punch.id}`}>
-                  <Card.Title>Clock-In</Card.Title>
-                  <Card.Text key={`clockindetail-${punch.id}`}>
-                    {moment(punch.starttime).format("h:mm A")}
-                  </Card.Text>
-                  <Card.Title key={`clockout-${punch.id}`}>
-                    {" "}
-                    {punch.endtime == null ? "" : "Clock-Out"}
-                  </Card.Title>
-                  <Card.Text key={`clockoutdetail-${punch.id}`}>
-                    {punch.endtime == null
-                      ? ""
-                      : moment(punch.endtime).format("h:mm A")}
-                  </Card.Text>
-                </Card.Body>
-                <Card.Footer key={`Hoursfooter-${punch.id}`}>
-                  <Card.Title key={`hours-${punch.id}`}>Hours</Card.Title>
-                  <Card.Text key={`hoursdetail-${punch.id}`}>
-                    {punch.endtime == null ? worked : punch.hours}
-                  </Card.Text>
-                </Card.Footer>
-                {punch.endtime == null ? (
-                  <Card.Footer key={`buttonfooter-${punch.id}`}>
-                    <Button
-                      key={`button-${punch.id}`}
-                      variant="primary"
-                      onClick={updateHours}
-                    >
-                      Refresh Hours
-                    </Button>
-                  </Card.Footer>
-                ) : (
-                  ""
-                )}
-              </Card>
-            </>
-          );
-        })}
-      </CardDeck>
-      {period === periodFilter[periodFilter.length - 1] ? (
-        <Button variant="primary" block onClick={moveToNext} disabled>
-          Show Next Period
-        </Button>
-      ) : (
-        <Button variant="primary" block onClick={moveToNext}>
-          Show Next Period
-        </Button>
-      )}
-      <Card key="totalhours">
-        <Card.Header as="h5">Total Hours for Period</Card.Header>
-        <Card.Body>
-          <Card.Title>{totalWorked >= 0 ? totalWorked : ""}</Card.Title>
-          {currentPeriod === period && isClockedIn === true ? (
-            <Button variant="primary" onClick={updateHours}>
-              Refresh Hours
+      <LeftNav />
+      <div className="item3">
+        <YearDropdown />
+        <PeriodDropdown />
+        <ButtonToolbar>
+          {period !== currentPeriod ? (
+            <Button variant="outline-dark" block onClick={moveToCurrent}>
+              Show Current Period
             </Button>
           ) : (
-            <Button variant="primary" onClick={updateHours} hidden>
-              Refresh Hours
+            <Button
+              variant="outline-dark"
+              block
+              onClick={moveToCurrent}
+              disabled
+            >
+              Show Current Period
             </Button>
           )}
-        </Card.Body>
-      </Card>
-    </>
+        </ButtonToolbar>
+        {period === periodFilter[0] ? (
+          <Button
+            variant="outline-secondary"
+            block
+            onClick={moveToPrevious}
+            disabled
+          >
+            Show Previous Period
+          </Button>
+        ) : (
+          <Button variant="outline-secondary" block onClick={moveToPrevious}>
+            Show Previous Period
+          </Button>
+        )}
+        <CardDeck>
+          {time.map(punch => {
+            return (
+              <>
+                <Card
+                  key={`card-${punch.id}`}
+                  bg="light"
+                  className="text-center"
+                  border="dark"
+                  style={{ width: "10rem" }}
+                >
+                  <Card.Header key={`date-${punch.id}`} as="h5">
+                    {moment(punch.starttime).format("MM/DD/YYYY")}
+                  </Card.Header>
+                  <Card.Body key={`clockin-${punch.id}`}>
+                    <Card.Title>Clock-In</Card.Title>
+                    <Card.Text key={`clockindetail-${punch.id}`}>
+                      {moment(punch.starttime).format("h:mm A")}
+                    </Card.Text>
+                    <Card.Title key={`clockout-${punch.id}`}>
+                      {" "}
+                      {punch.endtime == null ? "" : "Clock-Out"}
+                    </Card.Title>
+                    <Card.Text key={`clockoutdetail-${punch.id}`}>
+                      {punch.endtime == null
+                        ? ""
+                        : moment(punch.endtime).format("h:mm A")}
+                    </Card.Text>
+                  </Card.Body>
+                  <Card.Footer key={`Hoursfooter-${punch.id}`}>
+                    <Card.Title key={`hours-${punch.id}`}>Hours</Card.Title>
+                    <Card.Text key={`hoursdetail-${punch.id}`}>
+                      {punch.endtime == null ? worked : punch.hours}
+                    </Card.Text>
+                  </Card.Footer>
+                  {punch.endtime == null ? (
+                    <Card.Footer key={`buttonfooter-${punch.id}`}>
+                      <Button
+                        key={`button-${punch.id}`}
+                        variant="primary"
+                        onClick={updateHours}
+                      >
+                        Refresh Hours
+                      </Button>
+                    </Card.Footer>
+                  ) : (
+                    ""
+                  )}
+                </Card>
+              </>
+            );
+          })}
+        </CardDeck>
+        {period === periodFilter[periodFilter.length - 1] ? (
+          <Button variant="outline-dark" block onClick={moveToNext} disabled>
+            Show Next Period
+          </Button>
+        ) : (
+          <Button variant="outline-dark" block onClick={moveToNext}>
+            Show Next Period
+          </Button>
+        )}
+        <Card key="totalhours">
+          <Card.Header as="h5">Total Hours for Period</Card.Header>
+          <Card.Body>
+            <Card.Title>{totalWorked >= 0 ? totalWorked : ""}</Card.Title>
+            {currentPeriod === period && isClockedIn === true ? (
+              <Button variant="primary" onClick={updateHours}>
+                Refresh Hours
+              </Button>
+            ) : (
+              <Button variant="primary" onClick={updateHours} hidden>
+                Refresh Hours
+              </Button>
+            )}
+          </Card.Body>
+        </Card>
+      </div>
+    </div>
   );
 };
 
