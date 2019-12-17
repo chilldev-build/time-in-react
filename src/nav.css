@@ -1,5 +1,5 @@
 .menu {
-  grid-area: 6 / 1 / fill / 4;
+  grid-area: 2 / 1 / fill / 2;
   z-index: 1;
 }
 .menu ul {
@@ -35,7 +35,7 @@
 .menu ul li:focus {
   outline: none;
 }
-@media screen and (max-width: 900px) and (min-width: 400px) {
+/* @media screen and (max-width: 900px) and (min-width: 400px) {
   .menu {
     width: 90px;
   }
@@ -114,4 +114,4 @@
   .menu:focus .smartphone-menu-trigger {
     pointer-events: none;
   }
-}
+} */
