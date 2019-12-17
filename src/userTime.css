@@ -1,0 +1,16 @@
+.grid-container {
+  height: 100vh;
+  /* border: 10px solid #14a76c; */
+  display: grid;
+  grid-template-rows: repeat(20, 1fr);
+  grid-template-columns: repeat(20, 1fr);
+  grid-gap: 2px;
+}
+
+.item1 {
+  grid-area: 1 / 1 / 6 / fill;
+}
+
+.item3 {
+  grid-area: 6 / 4 / fill / fill;
+}
