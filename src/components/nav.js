@@ -9,12 +9,6 @@ const LeftNav = () => {
         <li className="icon-dashboard">
           <span>Dashboard</span>
         </li>
-        <li className="icon-customers">
-          <span>Customers</span>
-        </li>
-        <li className="icon-users">
-          <span>Users</span>
-        </li>
         <li className="icon-settings">
           <span>Settings</span>
         </li>

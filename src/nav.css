@@ -1,6 +1,8 @@
 .menu {
   grid-area: 2 / 1 / fill / 2;
   z-index: 1;
+  background-color: #007bff;
+  color: #fff;
 }
 .menu ul {
   list-style: none;
@@ -35,7 +37,7 @@
 .menu ul li:focus {
   outline: none;
 }
-/* @media screen and (max-width: 900px) and (min-width: 400px) {
+@media screen and (max-width: 900px) and (min-width: 400px) {
   .menu {
     width: 90px;
   }
@@ -114,4 +116,4 @@
   .menu:focus .smartphone-menu-trigger {
     pointer-events: none;
   }
-} */
+}
