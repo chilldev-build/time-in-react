@@ -114,7 +114,7 @@ const TimeParams = () => {
   }, [period]);
 
   const getYears = async () => {
-    const url = "http://timeapi.chilldev.io/time/years/1";
+    const url = "https://timeapi.chilldev.io/time/years/1";
     const yearsData = await loadData(url);
     let yearsArray = [];
     yearsData.map(year => {
@@ -125,7 +125,7 @@ const TimeParams = () => {
   };
 
   const getPeriods = async () => {
-    const url = "http://timeapi.chilldev.io/time/periods/1";
+    const url = "https://timeapi.chilldev.io/time/periods/1";
     const periodData = await loadData(url);
     setCalendarPeriods(periodData);
     let periodArray = [];
@@ -158,7 +158,7 @@ const TimeParams = () => {
 
   const refreshData = async () => {
     let periodData = await getPeriods();
-    const url = "http://timeapi.chilldev.io/time/1";
+    const url = "https://timeapi.chilldev.io/time/1";
     const timeData = await loadData(url);
     let punchIn =
       timeData[timeData.length - 1].endtime == null
@@ -244,7 +244,7 @@ const TimeParams = () => {
 
   const clockOut = async e => {
     e.preventDefault();
-    const url = "http://timeapi.chilldev.io/time/clockout/1";
+    const url = "https://timeapi.chilldev.io/time/clockout/1";
     const clockOutData = await updateData(url);
     updateYear(moment().format("YYYY"));
     setLastPunch([]);
@@ -253,7 +253,7 @@ const TimeParams = () => {
 
   const clockIn = async e => {
     e.preventDefault();
-    const url = "http://timeapi.chilldev.io/time/clockin/1";
+    const url = "https://timeapi.chilldev.io/time/clockin/1";
     const clockInData = await newData(url);
     let punchIn = clockInData;
 
