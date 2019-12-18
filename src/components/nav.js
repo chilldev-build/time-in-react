@@ -4,7 +4,7 @@ import "../../src/nav.css";
 const LeftNav = () => {
   return (
     <nav className="menu">
-      <div class="smartphone-menu-trigger"></div>
+      <div className="smartphone-menu-trigger"></div>
       <ul>
         <li className="icon-dashboard">
           <span>Dashboard</span>
