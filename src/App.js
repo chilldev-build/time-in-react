@@ -7,7 +7,7 @@ import TimeParams from "./components/userTime";
 function App() {
   return (
     <Router>
-      <Route path="/time/1" component={TimeParams} />
+      <Route path="/" exact component={TimeParams} />
     </Router>
   );
 }
