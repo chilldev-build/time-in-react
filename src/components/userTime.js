@@ -344,21 +344,52 @@ const TimeParams = () => {
               Show Current Period
             </Button>
           )}
+          {period === periodFilter[0] ? (
+            <Button
+              variant="outline-secondary"
+              block
+              onClick={moveToPrevious}
+              disabled
+            >
+              Show Previous Period
+            </Button>
+          ) : (
+            <Button variant="outline-secondary" block onClick={moveToPrevious}>
+              Show Previous Period
+            </Button>
+          )}
+          {period === periodFilter[periodFilter.length - 1] ? (
+            <Button variant="outline-dark" block onClick={moveToNext} disabled>
+              Show Next Period
+            </Button>
+          ) : (
+            <Button variant="outline-dark" block onClick={moveToNext}>
+              Show Next Period
+            </Button>
+          )}
         </ButtonToolbar>
-        {period === periodFilter[0] ? (
-          <Button
-            variant="outline-secondary"
-            block
-            onClick={moveToPrevious}
-            disabled
-          >
-            Show Previous Period
-          </Button>
-        ) : (
-          <Button variant="outline-secondary" block onClick={moveToPrevious}>
-            Show Previous Period
-          </Button>
-        )}
+        <Card key="totalhours">
+          <Card.Header as="h5">
+            {totalWorked >= 0 ? (
+              <p>Total Hours for Period: {totalWorked}</p>
+            ) : (
+              ""
+            )}
+          </Card.Header>
+          {/* <Card.Body> */}
+          {/* <Card.Title> */}
+          {currentPeriod === period && isClockedIn === true ? (
+            <Button variant="primary" onClick={updateHours}>
+              Refresh Hours
+            </Button>
+          ) : (
+            <Button variant="primary" onClick={updateHours} hidden>
+              Refresh Hours
+            </Button>
+          )}
+          {/* </Card.Title> */}
+          {/* </Card.Body> */}
+        </Card>
         {/* <CardDeck className="carddeck"> */}
         <div className="scroll-zone">
           <div className="auto-grid">
@@ -415,30 +446,6 @@ const TimeParams = () => {
             })}
           </div>
           {/* </CardDeck> */}
-          {period === periodFilter[periodFilter.length - 1] ? (
-            <Button variant="outline-dark" block onClick={moveToNext} disabled>
-              Show Next Period
-            </Button>
-          ) : (
-            <Button variant="outline-dark" block onClick={moveToNext}>
-              Show Next Period
-            </Button>
-          )}
-          <Card key="totalhours">
-            <Card.Header as="h5">Total Hours for Period</Card.Header>
-            <Card.Body>
-              <Card.Title>{totalWorked >= 0 ? totalWorked : ""}</Card.Title>
-              {currentPeriod === period && isClockedIn === true ? (
-                <Button variant="primary" onClick={updateHours}>
-                  Refresh Hours
-                </Button>
-              ) : (
-                <Button variant="primary" onClick={updateHours} hidden>
-                  Refresh Hours
-                </Button>
-              )}
-            </Card.Body>
-          </Card>
         </div>
       </div>
     </div>
