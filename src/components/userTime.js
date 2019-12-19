@@ -13,12 +13,14 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../../src/userTime.css";
 
 const TimeParams = () => {
-  const [time, setTime] = useState([
-    { id: 1, starttime: moment().format(), endtime: moment().format() }
-  ]);
-  const [timeStore, setTimeStore] = useState([
-    { id: 1, starttime: moment().format(), endtime: moment().format() }
-  ]);
+  // const [time, setTime] = useState([
+  //   { id: 1, starttime: moment().format(), endtime: moment().format() }
+  // ]);
+  const [time, setTime] = useState([]);
+  // const [timeStore, setTimeStore] = useState([
+  //   { id: 1, starttime: moment().format(), endtime: moment().format() }
+  // ]);
+  const [timeStore, setTimeStore] = useState([]);
   const [lastPunch, setLastPunch] = useState("");
   const [isClockedIn, setIsClockedIn] = useState("");
   const [worked, setWorked] = useState("");
@@ -29,12 +31,8 @@ const TimeParams = () => {
     "00/00/0000 - 00/00/0000"
   ]);
   const [periodFilter, setPeriodFilter] = useState(["00/00/0000 - 00/00/0000"]);
-  const [currentPeriod, setCurrentPeriod] = useState("");
-  const [year, YearDropdown, updateYear] = useDropdown(
-    "Year ",
-    moment().format("YYYY"),
-    calYears
-  );
+  const [currentPeriod, setCurrentPeriod] = useState("00/00/0000 - 00/00/0000");
+  const [year, YearDropdown, updateYear] = useDropdown("Year ", "", calYears);
   const [period, PeriodDropdown, updatePeriod] = useDropdown(
     "Work Period ",
     currentPeriod,
@@ -75,11 +73,11 @@ const TimeParams = () => {
       filterPeriodArray.push(period.period);
     });
     setPeriodFilter(filterPeriodArray);
-
-    let notCurrentYearFunction =
-      moment().format("YYYY") === filterPeriodArray[0].substring(19, 24)
-        ? ""
-        : updatePeriod(filterPeriodArray[0]);
+    updatePeriod(filterPeriodArray[0]);
+    // let notCurrentYearFunction =
+    //   moment().format("YYYY") === filterPeriodArray[0].substring(19, 24)
+    //     ? ""
+    //     : updatePeriod(filterPeriodArray[0]);
   }, [year]);
 
   //Period component did update
@@ -91,10 +89,12 @@ const TimeParams = () => {
 
     function checkPeriod(item) {
       return (
-        moment(item.starttime).format("YYYY") === period.substring(19, 24) &&
-        moment(item.starttime).format("MM/DD/YYYY") >=
-          period.substring(0, 10) &&
-        moment(item.starttime).format("MM/DD/YYYY") <= period.substring(13, 23)
+        moment(moment(item.starttime).format("MM/DD/YYYY")).diff(
+          period.substring(0, 10)
+        ) >= 0 &&
+        moment(moment(item.starttime).format("MM/DD/YYYY")).diff(
+          period.substring(13, 23)
+        ) <= 0
       );
     }
 
@@ -142,7 +142,7 @@ const TimeParams = () => {
     });
 
     function checkYear(year) {
-      return year.year === moment().format("YYYY");
+      return year.year === currentPeriod.substring(19, 23);
     }
 
     periodArray = periodArray.filter(checkYear);
@@ -152,7 +152,6 @@ const TimeParams = () => {
     });
 
     setPeriodFilter(filterPeriodArray);
-
     return periodData;
   };
 
@@ -169,11 +168,11 @@ const TimeParams = () => {
     setLastPunch(punchIn);
     let hoursArray = [];
     let punchFilter = timeData;
-    let periodArray = [];
+    let periodArrayForRefresh = [];
+    let filteredPeriodArrayForRefresh = [];
     let filterPeriodArray = [];
-
     periodData.map(period => {
-      periodArray.push({
+      periodArrayForRefresh.push({
         year: moment(period.period_end).format("YYYY"),
         period:
           moment(period.period_begin).format("MM/DD/YYYY") +
@@ -181,28 +180,34 @@ const TimeParams = () => {
           moment(period.period_end).format("MM/DD/YYYY")
       });
     });
-    function checkDate(item) {
-      return (
-        item.year === moment().format("YYYY") &&
-        item.period.substring(0, 10) <= moment().format("MM/DD/YYYY") &&
-        item.period.substring(13, 23) >= moment().format("MM/DD/YYYY")
-      );
-    }
-    periodArray = periodArray.filter(checkDate);
-    setCurrentPeriod(periodArray[0].period);
 
+    function checkDate(item) {
+      let testReturn =
+        moment(moment().format("MM/DD/YYYY")).diff(
+          item.period.substring(0, 10)
+        ) >= 0 &&
+        moment(moment().format("MM/DD/YYYY")).diff(
+          item.period.substring(13, 23)
+        ) <= 0;
+      return testReturn;
+    }
+
+    filteredPeriodArrayForRefresh = periodArrayForRefresh.filter(checkDate);
+    updateYear(filteredPeriodArrayForRefresh[0].period.substring(19, 23));
+    setCurrentPeriod(filteredPeriodArrayForRefresh[0].period);
     function checkPeriod(item) {
       return (
-        moment(item.starttime).format("MM/DD/YYYY") >=
-          moment(periodArray[0].period.substring(0, 10)).format("MM/DD/YYYY") &&
-        moment(item.starttime).format("MM/DD/YYYY") <=
-          periodArray[0].period.substring(13, 23)
+        moment(moment(item.starttime).format("MM/DD/YYYY")).diff(
+          filteredPeriodArrayForRefresh[0].period.substring(0, 10)
+        ) >= 0 &&
+        moment(moment(item.starttime).format("MM/DD/YYYY")).diff(
+          filteredPeriodArrayForRefresh[0].period.substring(13, 23)
+        ) <= 0
       );
     }
     let filterPunchArray = punchFilter.filter(checkPeriod);
-    setTime(filterPunchArray);
 
-    periodArray.map(period => {
+    filteredPeriodArrayForRefresh.map(period => {
       filterPeriodArray.push(period.period);
     });
     filterPunchArray.map(punch => {
@@ -223,7 +228,8 @@ const TimeParams = () => {
     );
     setWorked(calcHours);
     setTimeStore(timeData);
-    updatePeriod(periodArray[0].period);
+    updatePeriod(filteredPeriodArrayForRefresh[0].period);
+    setTime(filterPunchArray);
   };
 
   const updateHours = () => {
@@ -246,7 +252,8 @@ const TimeParams = () => {
     e.preventDefault();
     const url = "https://timeapi.chilldev.io/time/clockout/1";
     const clockOutData = await updateData(url);
-    updateYear(moment().format("YYYY"));
+    updateYear(currentPeriod.substring(19, 24));
+    updatePeriod(currentPeriod);
     setLastPunch([]);
     refreshData();
   };
@@ -257,16 +264,17 @@ const TimeParams = () => {
     const clockInData = await newData(url);
     let punchIn = clockInData;
 
-    updateYear(moment().format("YYYY"));
+    updateYear(currentPeriod.substring(19, 24));
+    updatePeriod(currentPeriod);
     setLastPunch(punchIn);
     refreshData();
   };
 
   const moveToCurrent = () => {
-    updateYear(moment().format("YYYY"));
+    updateYear(currentPeriod.substring(19, 24));
     setTimeout(() => {
       updatePeriod(currentPeriod);
-    }, 100);
+    }, 500);
   };
 
   function findCurrentIndex(periodIndex) {
@@ -277,7 +285,6 @@ const TimeParams = () => {
     setTimeout(() => {
       updatePeriod(periodFilter[periodFilter.findIndex(findCurrentIndex) - 1]);
     }, 100);
-    console.log(moment().format());
   };
 
   const moveToNext = () => {
@@ -315,7 +322,7 @@ const TimeParams = () => {
             </Button>
           ) : (
             ""
-          )}
+          )}{" "}
         </p>
       </Jumbotron>
       <LeftNav />
